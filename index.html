@@ -265,9 +265,7 @@
         </div>
 
         <div class="form-card">
-            <div class="message success" id="successMsg">
-                ✅ Issue submitted successfully! Recorded in Merchant Issues sheet.
-            </div>
+            <div class="message success" id="successMsg"></div>
             <div class="message error" id="errorMsg"></div>
 
             <form id="escalationForm">
@@ -348,6 +346,7 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="loading"></span> Submitting...';
             
+            // ⚠️ IMPORTANT: Update this URL after you redeploy the Apps Script
             const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0hhTPFHjx5wLF59sX9j3DXo_MJgX6BgJsYxk3bN_nrL7sVRUm11gh57Idj4FapH1KLA/exec';
             
             const formData = {
@@ -358,24 +357,33 @@
             };
             
             try {
-                await fetch(GOOGLE_SCRIPT_URL, {
+                // ✅ FIXED: Removed mode: 'no-cors' so we can read the response
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(formData)
                 });
                 
-                successMsg.style.display = 'block';
-                document.getElementById('escalationForm').reset();
-                charCount.textContent = 'Minimum 20 characters. Be as specific as possible.';
-                charCount.className = 'char-count';
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                const result = await response.json();
+                console.log('Server response:', result);
+                
+                if (result.result === 'success') {
+                    successMsg.textContent = '✅ Issue submitted successfully! Recorded in row ' + result.row;
+                    successMsg.style.display = 'block';
+                    document.getElementById('escalationForm').reset();
+                    charCount.textContent = 'Minimum 20 characters. Be as specific as possible.';
+                    charCount.className = 'char-count';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    errorMsg.textContent = '❌ Server error: ' + result.message;
+                    errorMsg.style.display = 'block';
+                }
                 
             } catch (error) {
-                console.error('Error:', error);
-                errorMsg.textContent = '❌ Failed to submit. Please check your connection and try again.';
+                console.error('Fetch error:', error);
+                errorMsg.textContent = '❌ Failed to submit. Please check your connection and try again. Error: ' + error.message;
                 errorMsg.style.display = 'block';
             } finally {
                 submitBtn.disabled = false;
