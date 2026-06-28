@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CarryBee - Issue Escalation Form</title>
-    <!-- Google Fonts fallback -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Li Ador Noirrit (Bangla font) -->
     <link href="https://cdn.jsdelivr.net/gh/nokshaia/li-ador-noirrit@main/LiAdorNoirrit.css" rel="stylesheet">
     
     <style>
@@ -231,12 +229,23 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .bee-decoration {
-            position: fixed;
-            bottom: 20px; left: 20px;
-            font-size: 40px;
-            opacity: 0.3;
-            pointer-events: none;
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 204, 0, 0.1);
+        }
+
+        .footer-text {
+            font-family: 'Gilroy', 'Inter', sans-serif;
+            font-size: 12px;
+            color: #666;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-text span {
+            color: #FFCC00;
+            font-weight: 500;
         }
 
         @media (max-width: 640px) {
@@ -247,13 +256,10 @@
     </style>
 </head>
 <body>
-    <div class="bee-decoration">🐝</div>
-    
     <div class="container">
         <div class="header">
-            <!-- CarryBee Logo -->
             <img src="Carrybee Logo-04.png" alt="CarryBee" class="logo-img">
-            <div class="subtitle">Account Development Team</div>
+            <div class="subtitle">Developed by the KAM Team</div>
             <div class="divider"></div>
             <h1 class="title">Issue Escalation Form</h1>
         </div>
@@ -300,6 +306,10 @@
 
                 <button type="submit" class="submit-btn" id="submitBtn">Submit Issue</button>
             </form>
+
+            <div class="footer">
+                <p class="footer-text">Developed by <span>Ahmed Asif Rashid</span> And <span>Nahid</span></p>
+            </div>
         </div>
     </div>
 
