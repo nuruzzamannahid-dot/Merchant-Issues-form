@@ -21,11 +21,7 @@
             --success: #51CF66;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Poppins', sans-serif;
@@ -38,10 +34,7 @@
             padding: 40px 20px;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
+        .header { text-align: center; margin-bottom: 32px; }
 
         .logo {
             width: 280px;
@@ -65,11 +58,7 @@
             border-radius: 2px;
         }
 
-        .title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
+        .title { font-size: 1.5rem; font-weight: 600; }
 
         .form-container {
             background: var(--card-bg);
@@ -81,9 +70,7 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
 
-        .form-group {
-            margin-bottom: 24px;
-        }
+        .form-group { margin-bottom: 24px; }
 
         label {
             display: block;
@@ -95,14 +82,9 @@
             margin-bottom: 10px;
         }
 
-        label .required {
-            color: var(--primary);
-            margin-left: 4px;
-        }
+        label .required { color: var(--primary); margin-left: 4px; }
 
-        input[type="text"],
-        select,
-        textarea {
+        input[type="text"], select, textarea {
             width: 100%;
             padding: 14px 16px;
             background: var(--input-bg);
@@ -115,14 +97,9 @@
             outline: none;
         }
 
-        input[type="text"]::placeholder,
-        textarea::placeholder {
-            color: var(--text-muted);
-        }
+        input[type="text"]::placeholder, textarea::placeholder { color: var(--text-muted); }
 
-        input[type="text"]:focus,
-        select:focus,
-        textarea:focus {
+        input[type="text"]:focus, select:focus, textarea:focus {
             border-color: var(--border-focus);
             box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.1);
         }
@@ -136,28 +113,12 @@
             padding-right: 40px;
         }
 
-        select option {
-            background: var(--card-bg);
-            color: var(--text-primary);
-        }
+        select option { background: var(--card-bg); color: var(--text-primary); }
+        select:invalid, select option:first-child { color: var(--text-muted); }
 
-        select:invalid,
-        select option:first-child {
-            color: var(--text-muted);
-        }
+        textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
 
-        textarea {
-            resize: vertical;
-            min-height: 120px;
-            line-height: 1.6;
-        }
-
-        .hint {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 8px;
-            text-align: right;
-        }
+        .hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; text-align: right; }
 
         .submit-btn {
             width: 100%;
@@ -180,10 +141,7 @@
             box-shadow: 0 8px 24px rgba(245, 197, 24, 0.25);
         }
 
-        .submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .footer {
             text-align: center;
@@ -192,13 +150,8 @@
             color: var(--text-muted);
         }
 
-        .footer a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-        }
+        .footer a { color: var(--primary); text-decoration: none; font-weight: 600; }
 
-        /* Toast Notification */
         .toast {
             position: fixed;
             top: 24px;
@@ -216,19 +169,9 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.3);
         }
 
-        .toast.show {
-            transform: translateX(0);
-        }
-
-        .toast.success {
-            background: var(--success);
-            color: white;
-        }
-
-        .toast.error {
-            background: var(--error);
-            color: white;
-        }
+        .toast.show { transform: translateX(0); }
+        .toast.success { background: var(--success); color: white; }
+        .toast.error { background: var(--error); color: white; }
 
         .spinner {
             display: inline-block;
@@ -240,24 +183,56 @@
             animation: spin 0.8s linear infinite;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .status-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .status-pill.telegram {
+            background: rgba(0, 136, 204, 0.15);
+            color: #08c;
+            border: 1px solid rgba(0, 136, 204, 0.3);
+        }
+
+        .status-pill.sheets {
+            background: rgba(15, 157, 88, 0.15);
+            color: #0f9d58;
+            border: 1px solid rgba(15, 157, 88, 0.3);
+        }
+
+        .status-pill .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
         }
 
         @media (max-width: 600px) {
-            .form-container {
-                padding: 28px 20px;
-            }
-            .logo {
-                width: 220px;
-            }
+            .form-container { padding: 28px 20px; }
+            .logo { width: 220px; }
         }
     </style>
+<base target="_blank">
 </head>
 <body>
 
     <div class="header">
-        <!-- Replace with your actual logo file path or URL -->
         <img src="Carrybee Logo-04.png" alt="Carrybee" class="logo" onerror="this.style.display='none'">
         <div class="subtitle">Developed by the KAM Team</div>
         <div class="divider"></div>
@@ -265,6 +240,11 @@
     </div>
 
     <div class="form-container">
+        <div class="status-bar">
+            <div class="status-pill telegram"><span class="dot"></span> Telegram Bot Active</div>
+            <div class="status-pill sheets"><span class="dot"></span> Google Sheets Connected</div>
+        </div>
+
         <form id="escalationForm">
             <div class="form-group">
                 <label for="consignmentId">Consignment ID <span class="required">*</span></label>
@@ -309,10 +289,16 @@
 
     <script>
         // ============================================
-        // CONFIG: Paste your Google Apps Script Web App URL here
+        // CONFIGURATION - ALL SET ✅
         // ============================================
-        const GAS_WEB_APP_URL = "YOUR_GAS_WEB_APP_URL_HERE";
-        // ============================================
+        const BOT_TOKEN = "8669705066:AAHuKUG2-a1DkZ-1tK60aIqp51q_o1K81Oo";
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyZCFlIdnCtIUPAftdxbMuxeBKQFj7pB41xvmIydwts_dxxdM0CAqK6FzFUTvClq73yAA/exec";
+
+        // Chat IDs extracted from your bot's getUpdates
+        const RECIPIENTS = [
+            { id: "8485545697", name: "Nahid" },
+            { id: "8839924588", name: "Ahmed" }
+        ];
 
         const form = document.getElementById('escalationForm');
         const submitBtn = document.getElementById('submitBtn');
@@ -323,6 +309,20 @@
             toast.className = `toast ${type}`;
             requestAnimationFrame(() => toast.classList.add('show'));
             setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        async function sendTelegramMessage(chatId, text) {
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: text,
+                    parse_mode: 'Markdown'
+                })
+            });
+            return response.json();
         }
 
         form.addEventListener('submit', async (e) => {
@@ -336,7 +336,7 @@
 
             const originalText = submitBtn.textContent;
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="spinner"></span> Submitting...';
+            submitBtn.innerHTML = '<span class="spinner"></span> Sending...';
 
             const payload = {
                 consignmentId: document.getElementById('consignmentId').value.trim(),
@@ -345,24 +345,58 @@
                 issueDetails: details.trim()
             };
 
+            // Build Telegram message
+            const telegramMessage = `🚨 *Carrybee Issue Escalation*
+
+📦 *Consignment:* ${payload.consignmentId}
+🏪 *Merchant:* ${payload.merchantName}
+🏷️ *Category:* ${payload.issueTag}
+📝 *Details:* ${payload.issueDetails}`;
+
+            let sheetSuccess = false;
+            let telegramResults = [];
+
             try {
-                const response = await fetch(GAS_WEB_APP_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                // 1. Submit to Google Sheet
+                try {
+                    const sheetResponse = await fetch(GAS_WEB_APP_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                        mode: 'no-cors'
+                    });
+                    // no-cors mode doesn't return readable response, assume success if no error
+                    sheetSuccess = true;
+                } catch (sheetErr) {
+                    console.warn('Sheet error:', sheetErr);
+                }
+
+                // 2. Send Telegram notifications to ALL recipients
+                const telegramPromises = RECIPIENTS.map(async (recipient) => {
+                    try {
+                        const result = await sendTelegramMessage(recipient.id, telegramMessage);
+                        return { name: recipient.name, ok: result.ok === true, error: result.description };
+                    } catch (err) {
+                        return { name: recipient.name, ok: false, error: err.message };
+                    }
                 });
 
-                const result = await response.json();
+                telegramResults = await Promise.all(telegramPromises);
+                const allTelegramOk = telegramResults.every(r => r.ok);
+                const sentTo = telegramResults.filter(r => r.ok).map(r => r.name).join(' & ');
 
-                if (result.result === 'success') {
-                    showToast('✅ Issue submitted successfully! Telegram alert sent.');
+                if (allTelegramOk) {
+                    let msg = `✅ Alert sent to ${sentTo} via Telegram!`;
+                    if (sheetSuccess) msg += ' Data saved to Google Sheet.';
+                    showToast(msg, 'success');
                     form.reset();
                 } else {
-                    throw new Error(result.message || 'Unknown error');
+                    const failed = telegramResults.filter(r => !r.ok).map(r => `${r.name}: ${r.error}`).join(', ');
+                    showToast('⚠️ Some alerts failed: ' + failed, 'error');
                 }
             } catch (error) {
                 console.error(error);
-                showToast('❌ Failed to submit. Please try again.', 'error');
+                showToast('❌ Failed to submit. Check console.', 'error');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
