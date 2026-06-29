@@ -1,1 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrybee - Issue Escalation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #F5C518;
+            --primary-hover: #E5B800;
+            --bg-dark: #2E2B2B;
+            --card-bg: #3A3636;
+            --input-bg: #4A4646;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B8B3B3;
+            --text-muted: #8A8585;
+            --border: rgba(245, 197, 24, 0.15);
+            --border-focus: rgba(245, 197, 24, 0.5);
+            --error: #FF6B6B;
+            --success: #51CF66;
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo {
+            width: 280px;
+            margin-bottom: 16px;
+            filter: brightness(1.1);
+        }
+
+        .subtitle {
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .divider {
+            width: 40px;
+            height: 3px;
+            background: var(--primary);
+            margin: 0 auto 16px;
+            border-radius: 2px;
+        }
+
+        .title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 560px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        label .required {
+            color: var(--primary);
+            margin-left: 4px;
+        }
+
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input[type="text"]::placeholder,
+        textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        input[type="text"]:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.1);
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23F5C518' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 40px;
+        }
+
+        select option {
+            background: var(--card-bg);
+            color: var(--text-primary);
+        }
+
+        select:invalid,
+        select option:first-child {
+            color: var(--text-muted);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+            line-height: 1.6;
+        }
+
+        .hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+            text-align: right;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: #1a1a1a;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(245, 197, 24, 0.25);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transform: translateX(150%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            background: var(--success);
+            color: white;
+        }
+
+        .toast.error {
+            background: var(--error);
+            color: white;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            .form-container {
+                padding: 28px 20px;
+            }
+            .logo {
+                width: 220px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <!-- Replace with your actual logo file path or URL -->
+        <img src="Carrybee Logo-04.png" alt="Carrybee" class="logo" onerror="this.style.display='none'">
+        <div class="subtitle">Developed by the KAM Team</div>
+        <div class="divider"></div>
+        <h1 class="title">Issue Escalation Form</h1>
+    </div>
+
+    <div class="form-container">
+        <form id="escalationForm">
+            <div class="form-group">
+                <label for="consignmentId">Consignment ID <span class="required">*</span></label>
+                <input type="text" id="consignmentId" name="consignmentId" placeholder="e.g. CB-2024-001234" required>
+            </div>
+
+            <div class="form-group">
+                <label for="merchantName">Merchant Name <span class="required">*</span></label>
+                <input type="text" id="merchantName" name="merchantName" placeholder="Your business name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="issueTag">Issue Tag <span class="required">*</span></label>
+                <select id="issueTag" name="issueTag" required>
+                    <option value="" disabled selected>— Select issue category —</option>
+                    <option value="Delivery Delay">Delivery Delay</option>
+                    <option value="Damaged Package">Damaged Package</option>
+                    <option value="Lost Shipment">Lost Shipment</option>
+                    <option value="Wrong Address">Wrong Address</option>
+                    <option value="Return Issue">Return Issue</option>
+                    <option value="Payment Dispute">Payment Dispute</option>
+                    <option value="Customer Complaint">Customer Complaint</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="issueDetails">Issue Details <span class="required">*</span></label>
+                <textarea id="issueDetails" name="issueDetails" placeholder="Describe the issue clearly — include dates, recipient info, or any other relevant context..." required minlength="20"></textarea>
+                <div class="hint">Minimum 20 characters. Be as specific as possible.</div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">Submit Issue</button>
+        </form>
+    </div>
+
+    <div class="footer">
+        Developed by <a href="#">Ahmed Asif Rashid</a> And <a href="#">Nahid</a>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // ============================================
+        // CONFIG: Paste your Google Apps Script Web App URL here
+        // ============================================
+        const GAS_WEB_APP_URL = "YOUR_GAS_WEB_APP_URL_HERE";
+        // ============================================
+
+        const form = document.getElementById('escalationForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const toast = document.getElementById('toast');
+
+        function showToast(message, type = 'success') {
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            requestAnimationFrame(() => toast.classList.add('show'));
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const details = document.getElementById('issueDetails').value;
+            if (details.trim().length < 20) {
+                showToast('Please provide at least 20 characters in Issue Details.', 'error');
+                return;
+            }
+
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span> Submitting...';
+
+            const payload = {
+                consignmentId: document.getElementById('consignmentId').value.trim(),
+                merchantName: document.getElementById('merchantName').value.trim(),
+                issueTag: document.getElementById('issueTag').value,
+                issueDetails: details.trim()
+            };
+
+            try {
+                const response = await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.result === 'success') {
+                    showToast('✅ Issue submitted successfully! Telegram alert sent.');
+                    form.reset();
+                } else {
+                    throw new Error(result.message || 'Unknown error');
+                }
+            } catch (error) {
+                console.error(error);
+                showToast('❌ Failed to submit. Please try again.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+    </script>
+</body>
+</html>
