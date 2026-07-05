@@ -380,7 +380,8 @@
         // CONFIGURATION
         // ============================================
         const BOT_TOKEN = "8669705066:AAHuKUG2-a1DkZ-1tK60aIqp51q_o1K81Oo";
-        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyZCFlIdnCtIUPAftdxbMuxeBKQFj7pB41xvmIydwts_dxxdM0CAqK6FzFUTvClq73yAA/exec";
+        // Your CarryBee backend (Express + Turso). Change this to your deployed Render URL.
+        const API_BASE_URL = "https://merchant-issues-escalation-databash.onrender.com";
 
         const RECIPIENTS = [
             { id: "8485545697", name: "Nahid" },
@@ -465,21 +466,25 @@
 🏷️ *Category:* ${payload.issueTag}
 📝 *Details:* ${payload.issueDetails}`;
 
-            let sheetSuccess = false;
+            let dbSuccess = false;
             let telegramResults = [];
 
             try {
-                // 1. Submit to Google Sheet
+                // 1. Save to the database (this is what the dashboard reads)
                 try {
-                    await fetch(GAS_WEB_APP_URL, {
+                    const dbResponse = await fetch(`${API_BASE_URL}/api/issues`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload),
-                        mode: 'no-cors'
+                        body: JSON.stringify(payload)
                     });
-                    sheetSuccess = true;
-                } catch (sheetErr) {
-                    console.warn('Sheet error:', sheetErr);
+                    if (!dbResponse.ok) {
+                        const errBody = await dbResponse.json().catch(() => ({}));
+                        throw new Error(errBody.error || `Server responded ${dbResponse.status}`);
+                    }
+                    dbSuccess = true;
+                } catch (dbErr) {
+                    console.error('Database save error:', dbErr);
+                    showToast('⚠️ Could not save to database: ' + dbErr.message, 'error');
                 }
 
                 // 2. Send Telegram notifications
@@ -495,12 +500,15 @@
                 telegramResults = await Promise.all(telegramPromises);
                 const allTelegramOk = telegramResults.every(r => r.ok);
 
-                if (allTelegramOk) {
+                if (dbSuccess) {
                     showSuccessModal();
                     form.reset();
-                } else {
-                    const failed = telegramResults.filter(r => !r.ok).map(r => `${r.name}: ${r.error}`).join(', ');
-                    showToast('⚠️ Telegram alert failed: ' + failed, 'error');
+                    if (!allTelegramOk) {
+                        const failed = telegramResults.filter(r => !r.ok).map(r => `${r.name}: ${r.error}`).join(', ');
+                        showToast('⚠️ Saved, but Telegram alert failed: ' + failed, 'error');
+                    }
+                } else if (allTelegramOk) {
+                    showToast('⚠️ Telegram alert sent, but database save failed. Please check with the team.', 'error');
                 }
             } catch (error) {
                 console.error(error);
