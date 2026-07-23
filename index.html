@@ -334,12 +334,12 @@
         <form id="escalationForm">
             <div class="form-group">
                 <label for="consignmentId">Consignment ID <span class="required">*</span></label>
-                <input type="text" id="consignmentId" name="consignmentId" placeholder="e.g. CB-2024-001234" required>
+                <input type="text" id="consignmentId" name="consignmentId" placeholder="e.g. CB-2024-001234" maxlength="50" required>
             </div>
 
             <div class="form-group">
                 <label for="merchantName">Merchant Name <span class="required">*</span></label>
-                <input type="text" id="merchantName" name="merchantName" placeholder="Your business name" required>
+                <input type="text" id="merchantName" name="merchantName" placeholder="Your business name" maxlength="100" required>
             </div>
 
             <div class="form-group">
@@ -362,8 +362,8 @@
 
             <div class="form-group">
                 <label for="issueDetails">Issue Details <span class="required">*</span></label>
-                <textarea id="issueDetails" name="issueDetails" placeholder="Describe the issue clearly — include dates, recipient info, or any other relevant context..." required minlength="20"></textarea>
-                <div class="hint">Minimum 20 characters. Be as specific as possible.</div>
+                <textarea id="issueDetails" name="issueDetails" placeholder="Describe the issue clearly — include dates, recipient info, or any other relevant context..." required minlength="20" maxlength="2000"></textarea>
+                <div class="hint">Minimum 20 characters, maximum 2000 characters. Be as specific as possible.</div>
             </div>
 
             <button type="submit" class="submit-btn" id="submitBtn">Submit Issue</button>
@@ -438,6 +438,14 @@
             if (e.target === successModal) hideSuccessModal();
         });
 
+        // Helper function to escape special characters for Telegram Markdown (V1)
+        // to prevent parsing errors and message injection.
+        function escapeMarkdown(text) {
+            if (!text) return "";
+            // In classic Telegram Markdown, characters like '_', '*', '`', and '[' need to be escaped with a backslash.
+            return text.replace(/([_*`\[])/g, '\\$1');
+        }
+
         async function sendTelegramMessage(chatId, text) {
             const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
             const response = await fetch(url, {
@@ -472,12 +480,18 @@
                 issueDetails: details.trim()
             };
 
+            // Escaping user-supplied fields to prevent Markdown injection/parsing failures
+            const safeConsignmentId = escapeMarkdown(payload.consignmentId);
+            const safeMerchantName = escapeMarkdown(payload.merchantName);
+            const safeIssueTag = escapeMarkdown(payload.issueTag);
+            const safeIssueDetails = escapeMarkdown(payload.issueDetails);
+
             const telegramMessage = `🚨 *Carrybee Issue Escalation*
 
-📦 *Consignment:* ${payload.consignmentId}
-🏪 *Merchant:* ${payload.merchantName}
-🏷️ *Category:* ${payload.issueTag}
-📝 *Details:* ${payload.issueDetails}`;
+📦 *Consignment:* ${safeConsignmentId}
+🏪 *Merchant:* ${safeMerchantName}
+🏷️ *Category:* ${safeIssueTag}
+📝 *Details:* ${safeIssueDetails}`;
 
             let dbSuccess = false;
             let telegramResults = [];
@@ -496,8 +510,9 @@
                     }
                     dbSuccess = true;
                 } catch (dbErr) {
+                    // Log the detailed error to console/internal logger, but show a secure, user-friendly error to the client to avoid leaking internals.
                     console.error('Database save error:', dbErr);
-                    showToast('⚠️ Could not save to database: ' + dbErr.message, 'error');
+                    showToast('⚠️ Could not save your issue to the database. The team has been notified.', 'error');
                 }
 
                 // 2. Send Telegram notifications
@@ -517,15 +532,17 @@
                     showSuccessModal();
                     form.reset();
                     if (!allTelegramOk) {
-                        const failed = telegramResults.filter(r => !r.ok).map(r => `${r.name}: ${r.error}`).join(', ');
-                        showToast('⚠️ Saved, but Telegram alert failed: ' + failed, 'error');
+                        // Log the failure details internally, and notify the user securely without raw tech stack/token/payload leaks
+                        console.error('Telegram notification failure detail:', telegramResults.filter(r => !r.ok));
+                        showToast('⚠️ Issue recorded successfully, but some automatic alerts failed to dispatch.', 'error');
                     }
                 } else if (allTelegramOk) {
-                    showToast('⚠️ Telegram alert sent, but database save failed. Please check with the team.', 'error');
+                    showToast('⚠️ Notification sent, but database save was unsuccessful. Please check back later.', 'error');
                 }
             } catch (error) {
-                console.error(error);
-                showToast('❌ Failed to submit. Check console.', 'error');
+                // Log the raw error internally and present a clean, high-level message to the user
+                console.error('Submission error:', error);
+                showToast('❌ Failed to submit the issue. Please try again or contact support.', 'error');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
