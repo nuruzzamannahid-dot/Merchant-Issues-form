@@ -299,18 +299,6 @@
             box-shadow: 0 8px 24px rgba(245, 197, 24, 0.3);
         }
 
-        .footer {
-            margin-top: 32px;
-            text-align: center;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        .footer a {
-            color: var(--primary);
-            text-decoration: none;
-        }
-
         @media (max-width: 600px) {
             .form-container { padding: 28px 20px; }
             .logo { width: 220px; }
@@ -334,12 +322,12 @@
         <form id="escalationForm">
             <div class="form-group">
                 <label for="consignmentId">Consignment ID <span class="required">*</span></label>
-                <input type="text" id="consignmentId" name="consignmentId" placeholder="e.g. CB-2024-001234" maxlength="50" required>
+                <input type="text" id="consignmentId" name="consignmentId" placeholder="e.g. CB-2024-001234" required>
             </div>
 
             <div class="form-group">
                 <label for="merchantName">Merchant Name <span class="required">*</span></label>
-                <input type="text" id="merchantName" name="merchantName" placeholder="Your business name" maxlength="100" required>
+                <input type="text" id="merchantName" name="merchantName" placeholder="Your business name" required>
             </div>
 
             <div class="form-group">
@@ -362,8 +350,8 @@
 
             <div class="form-group">
                 <label for="issueDetails">Issue Details <span class="required">*</span></label>
-                <textarea id="issueDetails" name="issueDetails" placeholder="Describe the issue clearly — include dates, recipient info, or any other relevant context..." required minlength="20" maxlength="2000"></textarea>
-                <div class="hint">Minimum 20 characters, maximum 2000 characters. Be as specific as possible.</div>
+                <textarea id="issueDetails" name="issueDetails" placeholder="Describe the issue clearly — include dates, recipient info, or any other relevant context..." required minlength="20"></textarea>
+                <div class="hint">Minimum 20 characters. Be as specific as possible.</div>
             </div>
 
             <button type="submit" class="submit-btn" id="submitBtn">Submit Issue</button>
@@ -393,12 +381,11 @@
         // ============================================
         const BOT_TOKEN = "8669705066:AAHuKUG2-a1DkZ-1tK60aIqp51q_o1K81Oo";
         // Your CarryBee backend (Express + Turso). Change this to your deployed Render URL.
-        const API_BASE_URL = "https://merchant-issues-escalation-databash.onrender.com";
+        const API_BASE_URL = "https://carrybee-app.onrender.com";
 
         const RECIPIENTS = [
             { id: "8485545697", name: "Nahid" },
-            { id: "8839924588", name: "Ahmed" },
-            { id: "8929987215", name: "Solayman" }   // ← NEW: +880 1701-208035
+            { id: "8839924588", name: "Ahmed" }
         ];
 
         // Theme Toggle
@@ -438,14 +425,6 @@
             if (e.target === successModal) hideSuccessModal();
         });
 
-        // Helper function to escape special characters for Telegram Markdown (V1)
-        // to prevent parsing errors and message injection.
-        function escapeMarkdown(text) {
-            if (!text) return "";
-            // In classic Telegram Markdown, characters like '_', '*', '`', and '[' need to be escaped with a backslash.
-            return text.replace(/([_*`\[])/g, '\\$1');
-        }
-
         async function sendTelegramMessage(chatId, text) {
             const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
             const response = await fetch(url, {
@@ -480,18 +459,12 @@
                 issueDetails: details.trim()
             };
 
-            // Escaping user-supplied fields to prevent Markdown injection/parsing failures
-            const safeConsignmentId = escapeMarkdown(payload.consignmentId);
-            const safeMerchantName = escapeMarkdown(payload.merchantName);
-            const safeIssueTag = escapeMarkdown(payload.issueTag);
-            const safeIssueDetails = escapeMarkdown(payload.issueDetails);
-
             const telegramMessage = `🚨 *Carrybee Issue Escalation*
 
-📦 *Consignment:* ${safeConsignmentId}
-🏪 *Merchant:* ${safeMerchantName}
-🏷️ *Category:* ${safeIssueTag}
-📝 *Details:* ${safeIssueDetails}`;
+📦 *Consignment:* ${payload.consignmentId}
+🏪 *Merchant:* ${payload.merchantName}
+🏷️ *Category:* ${payload.issueTag}
+📝 *Details:* ${payload.issueDetails}`;
 
             let dbSuccess = false;
             let telegramResults = [];
@@ -510,9 +483,8 @@
                     }
                     dbSuccess = true;
                 } catch (dbErr) {
-                    // Log the detailed error to console/internal logger, but show a secure, user-friendly error to the client to avoid leaking internals.
                     console.error('Database save error:', dbErr);
-                    showToast('⚠️ Could not save your issue to the database. The team has been notified.', 'error');
+                    showToast('⚠️ Could not save to database: ' + dbErr.message, 'error');
                 }
 
                 // 2. Send Telegram notifications
@@ -532,17 +504,15 @@
                     showSuccessModal();
                     form.reset();
                     if (!allTelegramOk) {
-                        // Log the failure details internally, and notify the user securely without raw tech stack/token/payload leaks
-                        console.error('Telegram notification failure detail:', telegramResults.filter(r => !r.ok));
-                        showToast('⚠️ Issue recorded successfully, but some automatic alerts failed to dispatch.', 'error');
+                        const failed = telegramResults.filter(r => !r.ok).map(r => `${r.name}: ${r.error}`).join(', ');
+                        showToast('⚠️ Saved, but Telegram alert failed: ' + failed, 'error');
                     }
                 } else if (allTelegramOk) {
-                    showToast('⚠️ Notification sent, but database save was unsuccessful. Please check back later.', 'error');
+                    showToast('⚠️ Telegram alert sent, but database save failed. Please check with the team.', 'error');
                 }
             } catch (error) {
-                // Log the raw error internally and present a clean, high-level message to the user
-                console.error('Submission error:', error);
-                showToast('❌ Failed to submit the issue. Please try again or contact support.', 'error');
+                console.error(error);
+                showToast('❌ Failed to submit. Check console.', 'error');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
