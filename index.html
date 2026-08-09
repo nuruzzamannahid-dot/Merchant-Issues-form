@@ -476,10 +476,6 @@
                     <input type="text" id="callMerchantName" name="callMerchantName" placeholder="Your business name" required>
                 </div>
                 <div class="form-group">
-                    <label for="callPhone">Phone Number</label>
-                    <input type="text" id="callPhone" name="callPhone" placeholder="e.g. 01XXXXXXXXX">
-                </div>
-                <div class="form-group">
                     <label for="callReason">Reason For Call <span class="required">*</span></label>
                     <textarea id="callReason" name="callReason" placeholder="Briefly describe why you need a call from the AD team..." required minlength="10" style="min-height: 90px;"></textarea>
                 </div>
@@ -588,14 +584,12 @@
 
             const callPayload = {
                 merchantName: document.getElementById('callMerchantName').value.trim(),
-                phone: document.getElementById('callPhone').value.trim(),
                 reason: reason
             };
 
             const telegramMessage = `📞 *Carrybee Call Request*
 
 🏪 *Merchant:* ${callPayload.merchantName}
-☎️ *Phone:* ${callPayload.phone}
 📝 *Reason:* ${callPayload.reason}`;
 
             try {
