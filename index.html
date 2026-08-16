@@ -395,6 +395,129 @@
             .logo { width: 220px; }
             .modal-content { padding: 36px 24px; }
         }
+
+        /* Photo Upload */
+        .photo-upload-box {
+            border: 1.5px dashed var(--border);
+            border-radius: 10px;
+            background: var(--input-bg);
+            padding: 18px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .photo-upload-box:hover { border-color: var(--border-focus); }
+        .photo-upload-box.has-photo { padding: 0; overflow: hidden; cursor: default; }
+
+        .photo-upload-box .upload-hint {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .photo-upload-box .upload-icon { font-size: 1.6rem; margin-bottom: 6px; }
+
+        .photo-preview-wrap { position: relative; }
+
+        .photo-preview {
+            width: 100%;
+            max-height: 220px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .photo-remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .photo-remove-btn:hover { background: rgba(0,0,0,0.8); }
+
+        /* Voice Recorder */
+        .voice-recorder-box {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--input-bg);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .record-btn {
+            flex-shrink: 0;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            border: none;
+            background: var(--primary);
+            color: #1a1a1a;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .record-btn:hover { background: var(--primary-hover); }
+
+        .record-btn.recording {
+            background: var(--error);
+            color: #fff;
+            animation: pulse 1.4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.5); }
+            70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        }
+
+        .voice-status {
+            flex: 1;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .voice-status.active { color: var(--text-primary); }
+
+        .voice-player {
+            flex: 1;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .voice-player.show { display: flex; }
+
+        .voice-player audio { flex: 1; height: 36px; }
+
+        .voice-remove-btn {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: var(--border);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .voice-remove-btn:hover { background: var(--error); color: #fff; }
     </style>
 <base target="_blank">
 </head>
@@ -444,6 +567,33 @@
                 <label for="issueDetails">Issue Details <span class="required">*</span></label>
                 <textarea id="issueDetails" name="issueDetails" placeholder="Describe the issue clearly — include dates, recipient info, or any other relevant context..." required minlength="20"></textarea>
                 <div class="hint">Minimum 20 characters. Be as specific as possible.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="photoInput">Photo <span style="color: var(--text-muted); text-transform: none; letter-spacing: 0; font-weight: 400;">(optional)</span></label>
+                <div class="photo-upload-box" id="photoUploadBox">
+                    <div id="photoPlaceholder">
+                        <div class="upload-icon">📷</div>
+                        <div class="upload-hint">Tap to take a photo or choose from gallery</div>
+                    </div>
+                    <div class="photo-preview-wrap" id="photoPreviewWrap" style="display:none;">
+                        <img id="photoPreview" class="photo-preview" alt="Photo preview">
+                        <button type="button" class="photo-remove-btn" id="photoRemoveBtn" title="Remove photo">✕</button>
+                    </div>
+                </div>
+                <input type="file" id="photoInput" name="photoInput" accept="image/*" capture="environment" style="display:none;">
+            </div>
+
+            <div class="form-group">
+                <label for="voiceRecordBtn">Voice Message <span style="color: var(--text-muted); text-transform: none; letter-spacing: 0; font-weight: 400;">(optional)</span></label>
+                <div class="voice-recorder-box">
+                    <button type="button" class="record-btn" id="voiceRecordBtn" title="Record voice message">🎙️</button>
+                    <div class="voice-status" id="voiceStatus">Tap to record a voice message</div>
+                    <div class="voice-player" id="voicePlayerWrap">
+                        <audio id="voicePlayer" controls></audio>
+                        <button type="button" class="voice-remove-btn" id="voiceRemoveBtn" title="Remove recording">✕</button>
+                    </div>
+                </div>
             </div>
 
             <div class="btn-row">
@@ -505,6 +655,158 @@
             { id: "8839924588", name: "Ahmed" },
             { id: "8929987215", name: "Solayman" }
         ];
+
+        // ============================================
+        // PHOTO UPLOAD
+        // ============================================
+        let selectedPhotoFile = null;
+        const MAX_ATTACHMENT_MB = 20;
+
+        const photoUploadBox = document.getElementById('photoUploadBox');
+        const photoInput = document.getElementById('photoInput');
+        const photoPlaceholder = document.getElementById('photoPlaceholder');
+        const photoPreviewWrap = document.getElementById('photoPreviewWrap');
+        const photoPreview = document.getElementById('photoPreview');
+        const photoRemoveBtn = document.getElementById('photoRemoveBtn');
+
+        photoUploadBox.addEventListener('click', (e) => {
+            if (e.target === photoRemoveBtn) return;
+            if (!selectedPhotoFile) photoInput.click();
+        });
+
+        photoInput.addEventListener('change', () => {
+            const file = photoInput.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                showToast('Please select an image file.', 'error');
+                photoInput.value = '';
+                return;
+            }
+            if (file.size > MAX_ATTACHMENT_MB * 1024 * 1024) {
+                showToast(`Photo is too large. Max ${MAX_ATTACHMENT_MB}MB.`, 'error');
+                photoInput.value = '';
+                return;
+            }
+
+            selectedPhotoFile = file;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                photoPreview.src = ev.target.result;
+                photoPlaceholder.style.display = 'none';
+                photoPreviewWrap.style.display = 'block';
+                photoUploadBox.classList.add('has-photo');
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function resetPhoto() {
+            selectedPhotoFile = null;
+            photoInput.value = '';
+            photoPreview.src = '';
+            photoPlaceholder.style.display = '';
+            photoPreviewWrap.style.display = 'none';
+            photoUploadBox.classList.remove('has-photo');
+        }
+
+        photoRemoveBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            resetPhoto();
+        });
+
+        // ============================================
+        // VOICE RECORDER
+        // ============================================
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let recordedBlob = null;
+        let recordingStream = null;
+        let recordingSeconds = 0;
+        let recordingTimer = null;
+
+        const voiceRecordBtn = document.getElementById('voiceRecordBtn');
+        const voiceStatus = document.getElementById('voiceStatus');
+        const voicePlayerWrap = document.getElementById('voicePlayerWrap');
+        const voicePlayer = document.getElementById('voicePlayer');
+        const voiceRemoveBtn = document.getElementById('voiceRemoveBtn');
+
+        function formatSeconds(s) {
+            const m = Math.floor(s / 60).toString().padStart(2, '0');
+            const sec = (s % 60).toString().padStart(2, '0');
+            return `${m}:${sec}`;
+        }
+
+        async function startRecording() {
+            if (!navigator.mediaDevices || !window.MediaRecorder) {
+                showToast('Voice recording is not supported in this browser.', 'error');
+                return;
+            }
+            try {
+                recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            } catch (err) {
+                showToast('Microphone access denied. Please allow mic access to record.', 'error');
+                return;
+            }
+
+            recordedChunks = [];
+            const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+                ? 'audio/webm;codecs=opus'
+                : (MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '');
+            mediaRecorder = mimeType ? new MediaRecorder(recordingStream, { mimeType }) : new MediaRecorder(recordingStream);
+
+            mediaRecorder.addEventListener('dataavailable', (e) => {
+                if (e.data.size > 0) recordedChunks.push(e.data);
+            });
+
+            mediaRecorder.addEventListener('stop', () => {
+                recordedBlob = new Blob(recordedChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+                voicePlayer.src = URL.createObjectURL(recordedBlob);
+                voicePlayerWrap.classList.add('show');
+                voiceStatus.style.display = 'none';
+                recordingStream.getTracks().forEach(t => t.stop());
+                recordingStream = null;
+            });
+
+            mediaRecorder.start();
+            recordingSeconds = 0;
+            voiceRecordBtn.classList.add('recording');
+            voiceRecordBtn.textContent = '⏹️';
+            voiceStatus.classList.add('active');
+            voiceStatus.textContent = `Recording… 00:00`;
+            recordingTimer = setInterval(() => {
+                recordingSeconds++;
+                voiceStatus.textContent = `Recording… ${formatSeconds(recordingSeconds)}`;
+            }, 1000);
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            clearInterval(recordingTimer);
+            voiceRecordBtn.classList.remove('recording');
+            voiceRecordBtn.textContent = '🎙️';
+            voiceStatus.classList.remove('active');
+        }
+
+        voiceRecordBtn.addEventListener('click', () => {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        });
+
+        function resetVoice() {
+            recordedBlob = null;
+            recordedChunks = [];
+            voicePlayer.src = '';
+            voicePlayerWrap.classList.remove('show');
+            voiceStatus.style.display = '';
+            voiceStatus.textContent = 'Tap to record a voice message';
+        }
+
+        voiceRemoveBtn.addEventListener('click', resetVoice);
 
         // Theme Toggle
         const themeToggle = document.getElementById('themeToggle');
@@ -638,6 +940,40 @@
             return response.json();
         }
 
+        async function sendTelegramPhoto(chatId, file, caption) {
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`;
+            const formData = new FormData();
+            formData.append('chat_id', chatId);
+            formData.append('caption', caption);
+            formData.append('photo', file, file.name || 'photo.jpg');
+            const response = await fetch(url, { method: 'POST', body: formData });
+            return response.json();
+        }
+
+        async function sendTelegramVoice(chatId, blob, caption) {
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`;
+            const formData = new FormData();
+            formData.append('chat_id', chatId);
+            formData.append('caption', caption);
+            const ext = (blob.type || '').includes('mp4') ? 'm4a' : 'webm';
+            formData.append('audio', blob, `voice-message.${ext}`);
+            const response = await fetch(url, { method: 'POST', body: formData });
+            return response.json();
+        }
+
+        async function sendAttachmentsToRecipients(caption) {
+            const jobs = [];
+            RECIPIENTS.forEach((recipient) => {
+                if (selectedPhotoFile) {
+                    jobs.push(sendTelegramPhoto(recipient.id, selectedPhotoFile, caption).catch(() => null));
+                }
+                if (recordedBlob) {
+                    jobs.push(sendTelegramVoice(recipient.id, recordedBlob, caption).catch(() => null));
+                }
+            });
+            if (jobs.length) await Promise.all(jobs);
+        }
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -699,9 +1035,17 @@
                 telegramResults = await Promise.all(telegramPromises);
                 const allTelegramOk = telegramResults.every(r => r.ok);
 
+                // 3. Send photo / voice attachments, if any, as a follow-up to each recipient
+                if (selectedPhotoFile || recordedBlob) {
+                    const attachmentCaption = `📎 Attachment for ${payload.consignmentId} — ${payload.merchantName}`;
+                    await sendAttachmentsToRecipients(attachmentCaption);
+                }
+
                 if (dbSuccess) {
                     showSuccessModal();
                     form.reset();
+                    resetPhoto();
+                    resetVoice();
                     if (!allTelegramOk) {
                         const failed = telegramResults.filter(r => !r.ok).map(r => `${r.name}: ${r.error}`).join(', ');
                         showToast('⚠️ Saved, but Telegram alert failed: ' + failed, 'error');
