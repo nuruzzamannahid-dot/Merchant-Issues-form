@@ -309,6 +309,132 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* Truck Loading Overlay (shown while the issue is being submitted) */
+        .truck-loading-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .truck-loading-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .truck-loading-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 28px 36px 22px;
+            text-align: center;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+        }
+
+        .truck-loading-text {
+            margin-top: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+        }
+
+        .loader {
+            width: fit-content;
+            height: fit-content;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .truckWrapper {
+            width: 200px;
+            height: 100px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            align-items: center;
+            justify-content: flex-end;
+            overflow-x: hidden;
+        }
+
+        .truckBody {
+            width: 130px;
+            height: fit-content;
+            margin-bottom: 6px;
+            animation: truckMotion 1s linear infinite;
+        }
+
+        @keyframes truckMotion {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(3px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .truckTires {
+            width: 130px;
+            height: fit-content;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0px 10px 0px 15px;
+            position: absolute;
+            bottom: 0;
+        }
+
+        .truckTires svg {
+            width: 24px;
+            animation: tireSpin 0.5s linear infinite;
+        }
+
+        @keyframes tireSpin {
+            100% { transform: rotate(360deg); }
+        }
+
+        .truckRoad {
+            width: 100%;
+            height: 1.5px;
+            background-color: var(--text-muted);
+            position: relative;
+            bottom: 0;
+            align-self: flex-end;
+            border-radius: 3px;
+        }
+
+        .truckRoad::before {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 100%;
+            background-color: var(--text-muted);
+            right: -50%;
+            border-radius: 3px;
+            animation: truckRoadAnim 1.4s linear infinite;
+            border-left: 10px solid var(--card-bg);
+        }
+
+        .truckRoad::after {
+            content: "";
+            position: absolute;
+            width: 10px;
+            height: 100%;
+            background-color: var(--text-muted);
+            right: -65%;
+            border-radius: 3px;
+            animation: truckRoadAnim 1.4s linear infinite;
+            border-left: 4px solid var(--card-bg);
+        }
+
+        @keyframes truckRoadAnim {
+            0% { transform: translateX(0px); }
+            100% { transform: translateX(-350px); }
+        }
+
         /* Success Popup Modal */
         .modal-overlay {
             position: fixed;
@@ -606,6 +732,40 @@
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
 
+    <!-- Truck Loading Overlay -->
+    <div class="truck-loading-overlay" id="truckLoadingOverlay">
+        <div class="truck-loading-card">
+            <div class="loader">
+                <div class="truckWrapper">
+                    <div class="truckBody">
+                        <svg width="198" height="93" viewBox="0 0 198 93" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="2" y="10" width="120" height="55" rx="6" fill="var(--primary)"/>
+                            <rect x="10" y="18" width="104" height="6" rx="3" fill="rgba(0,0,0,0.15)"/>
+                            <path d="M122 30 h34 a10 10 0 0 1 9 5.5 l14 21 a8 8 0 0 1 -7 12 h-50 z" fill="#3a3636"/>
+                            <path d="M132 38 h20 a6 6 0 0 1 5 3 l8 12 h-33 z" fill="#cfeaff"/>
+                            <rect x="176" y="58" width="10" height="10" rx="2" fill="#2d2d2d"/>
+                            <circle cx="182" cy="52" r="3" fill="#fff59d"/>
+                        </svg>
+                    </div>
+                    <div class="truckTires">
+                        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="20" cy="20" r="18" fill="#2d2d2d"/>
+                            <circle cx="20" cy="20" r="8" fill="#bbb"/>
+                            <circle cx="20" cy="20" r="3" fill="#2d2d2d"/>
+                        </svg>
+                        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="20" cy="20" r="18" fill="#2d2d2d"/>
+                            <circle cx="20" cy="20" r="8" fill="#bbb"/>
+                            <circle cx="20" cy="20" r="3" fill="#2d2d2d"/>
+                        </svg>
+                    </div>
+                    <div class="truckRoad"></div>
+                </div>
+            </div>
+            <div class="truck-loading-text">Sending your issue to the team...</div>
+        </div>
+    </div>
+
     <!-- Success Popup Modal -->
     <div class="modal-overlay" id="successModal">
         <div class="modal-content">
@@ -823,6 +983,15 @@
         const submitBtn = document.getElementById('submitBtn');
         const toast = document.getElementById('toast');
         const successModal = document.getElementById('successModal');
+        const truckLoadingOverlay = document.getElementById('truckLoadingOverlay');
+
+        function showTruckLoader() {
+            truckLoadingOverlay.classList.add('show');
+        }
+
+        function hideTruckLoader() {
+            truckLoadingOverlay.classList.remove('show');
+        }
         const modalCloseBtn = document.getElementById('modalCloseBtn');
 
         function showToast(message, type = 'success') {
@@ -986,6 +1155,7 @@
             const originalText = submitBtn.textContent;
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner"></span> Sending...';
+            showTruckLoader();
 
             const payload = {
                 consignmentId: document.getElementById('consignmentId').value.trim(),
@@ -1057,6 +1227,7 @@
                 console.error(error);
                 showToast('❌ Failed to submit. Check console.', 'error');
             } finally {
+                hideTruckLoader();
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
             }
