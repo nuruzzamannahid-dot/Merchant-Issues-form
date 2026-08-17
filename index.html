@@ -332,8 +332,10 @@
             background: var(--card-bg);
             border-radius: 20px;
             padding: 28px 36px 22px;
+            width: 272px;
             text-align: center;
             box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+            overflow: hidden;
         }
 
         .truck-loading-text {
@@ -345,11 +347,13 @@
         }
 
         .loader {
-            width: fit-content;
-            height: fit-content;
+            width: 200px;
+            height: 100px;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
+            margin: 0 auto;
         }
 
         .truckWrapper {
@@ -360,14 +364,20 @@
             position: relative;
             align-items: center;
             justify-content: flex-end;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
         .truckBody {
             width: 130px;
-            height: fit-content;
+            height: 61px;
             margin-bottom: 6px;
             animation: truckMotion 1s linear infinite;
+        }
+
+        .truckBody svg {
+            width: 100%;
+            height: 100%;
+            display: block;
         }
 
         @keyframes truckMotion {
@@ -378,7 +388,7 @@
 
         .truckTires {
             width: 130px;
-            height: fit-content;
+            height: 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -389,6 +399,8 @@
 
         .truckTires svg {
             width: 24px;
+            height: 24px;
+            display: block;
             animation: tireSpin 0.5s linear infinite;
         }
 
@@ -738,7 +750,7 @@
             <div class="loader">
                 <div class="truckWrapper">
                     <div class="truckBody">
-                        <svg width="198" height="93" viewBox="0 0 198 93" xmlns="http://www.w3.org/2000/svg">
+                        <svg viewBox="0 0 198 93" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
                             <rect x="2" y="10" width="120" height="55" rx="6" fill="var(--primary)"/>
                             <rect x="10" y="18" width="104" height="6" rx="3" fill="rgba(0,0,0,0.15)"/>
                             <path d="M122 30 h34 a10 10 0 0 1 9 5.5 l14 21 a8 8 0 0 1 -7 12 h-50 z" fill="#3a3636"/>
